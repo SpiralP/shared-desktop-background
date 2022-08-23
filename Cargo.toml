@@ -1,0 +1,18 @@
+[package]
+name = "shared-desktop-background"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+dirs = "4"
+futures = "0.3"
+google-drive3 = "4"
+hyper = { version = "0.14", features = ["stream"] }
+tokio = { version = "1", features = ["full"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+x11 = { version = "2", features = ["xlib"] }
+
+[target.'cfg(target_os = "windows")'.dependencies]
+winapi = { version = "0.3", features = ["winnt", "winuser"] }
