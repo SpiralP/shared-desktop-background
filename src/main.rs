@@ -6,6 +6,7 @@ use std::{env::args, time::Duration};
 
 use anyhow::{bail, ensure, Context, Result};
 use futures::StreamExt;
+use rand::{seq::SliceRandom, thread_rng};
 use tokio::{fs::File, io::AsyncWriteExt, time::MissedTickBehavior};
 
 use crate::{
@@ -25,33 +26,41 @@ async fn main() -> Result<()> {
     let mut interval = tokio::time::interval(INTERVAL);
     interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
 
+    let mut first = true;
     loop {
         interval.tick().await;
 
-        if let Err(e) = check_wallpaper(&folder_name, &drive).await {
+        if let Err(e) = check_wallpaper(&folder_name, &drive, &mut first).await {
             println!("{:?}", e);
         }
     }
 }
 
-pub async fn check_wallpaper(folder_name: &str, drive: &Drive) -> Result<()> {
+pub async fn check_wallpaper(folder_name: &str, drive: &Drive, first: &mut bool) -> Result<()> {
     let file_ids = drive.list_in_folder(folder_name).await?;
 
-    let file_id = select_file(file_ids).await?;
+    let file_id = select_file(&file_ids, first).await?;
 
-    set_wallpaper(&file_id, drive).await?;
+    set_wallpaper(file_id, drive).await?;
+    *first = false;
 
     Ok(())
 }
 
-pub async fn select_file(file_ids: Vec<String>) -> Result<String> {
+pub async fn select_file<'a>(file_ids: &'a [String], first: &mut bool) -> Result<&'a String> {
     let seen_files = get_seen_ids().await?;
 
     // show files we haven't seen before, first
     if let Some(file_id) = file_ids
-        .into_iter()
-        .find(|file_id| !seen_files.contains(file_id))
+        .iter()
+        .find(|file_id| !seen_files.contains(*file_id))
     {
+        return Ok(file_id);
+    }
+
+    if *first {
+        let mut rng = thread_rng();
+        let file_id = file_ids.choose(&mut rng).context("file_ids empty")?;
         return Ok(file_id);
     }
 
