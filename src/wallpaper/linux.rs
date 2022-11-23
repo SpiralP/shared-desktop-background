@@ -15,15 +15,15 @@ pub fn set(path: &Path) -> Result<()> {
             let mut file_url = OsString::from("file://");
             if secondary_path.exists() {
                 fs::remove_file(&secondary_path)?;
-                file_url.push(&path);
+                file_url.push(path);
             } else {
-                fs::rename(&path, &secondary_path)?;
+                fs::rename(path, &secondary_path)?;
                 file_url.push(&secondary_path);
             }
 
             ensure!(
                 Command::new("qdbus")
-                    .args(&[
+                    .args([
                         "org.kde.plasmashell",
                         "/PlasmaShell",
                         "org.kde.PlasmaShell.evaluateScript",
@@ -51,11 +51,11 @@ pub fn set(path: &Path) -> Result<()> {
     // gsettings set org.gnome.desktop.background picture-options scaled
 
     let mut file_url = OsString::from("file://");
-    file_url.push(&path);
+    file_url.push(path);
 
     ensure!(
         Command::new("gsettings")
-            .args(&[
+            .args([
                 "set",
                 "org.gnome.desktop.background",
                 "picture-uri",
