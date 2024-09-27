@@ -5,9 +5,9 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1"
-dirs = "4"
+dirs = "5.0.1"
 futures = "0.3"
-google-drive3 = "5"
+google-drive3 = "5.0.5"
 hyper = { version = "0.14", features = ["stream"] }
 rand = "0.8"
 tokio = { version = "1", features = ["full"] }

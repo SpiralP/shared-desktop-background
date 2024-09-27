@@ -25,6 +25,7 @@ impl Drive {
             Client::builder().build(
                 HttpsConnectorBuilder::new()
                     .with_native_roots()
+                    .unwrap()
                     .https_only()
                     .enable_http2()
                     .build(),
@@ -40,6 +41,7 @@ impl Drive {
             .hub
             .files()
             .list()
+            .add_scope(Scope::Readonly)
             .q(&format!(
                 "mimeType = 'application/vnd.google-apps.folder' and name = '{}'",
                 folder_name
@@ -54,6 +56,7 @@ impl Drive {
                     .hub
                     .files()
                     .list()
+                    .add_scope(Scope::Readonly)
                     .q(&format!("'{}' in parents", folder_id))
                     .doit()
                     .await?;
@@ -80,8 +83,8 @@ impl Drive {
             .hub
             .files()
             .get(file_id)
-            .param("alt", "media")
             .add_scope(Scope::Readonly)
+            .param("alt", "media")
             .doit()
             .await?;
 
